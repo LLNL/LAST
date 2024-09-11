@@ -10,7 +10,7 @@ at Lawrence Livermore National Laboratory, obtained through IBM's Cluster System
 
 The three files are:
 
-- `final_csm_allocation_history.csv`: Contains job-level information about node allocations.
+- `final_csm_allocation_history_hashed.csv`: Contains job-level information about node allocations.
 - `final_csm_allocation_node_history.csv`: Contains node-level information about jobs.
 - `final_csm_step_history.csv`: Contains the final disposition of jobs.
 

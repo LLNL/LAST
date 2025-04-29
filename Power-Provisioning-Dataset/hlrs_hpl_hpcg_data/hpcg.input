@@ -1,0 +1,20 @@
+HPCG-Benchmark
+version=3.1
+Release date=March 28, 2019
+Machine Summary=
+Machine Summary::Distributed Processes=2048
+Machine Summary::Threads per processes=4
+Global Problem Dimensions=
+Global Problem Dimensions::Global nx=2304
+Global Problem Dimensions::Global ny=2304
+Global Problem Dimensions::Global nz=1152
+Processor Dimensions=
+Processor Dimensions::npx=16
+Processor Dimensions::npy=16
+Processor Dimensions::npz=8
+Local Domain Dimensions=
+Local Domain Dimensions::nx=144
+Local Domain Dimensions::ny=144
+Local Domain Dimensions::Lower ipz=0
+Local Domain Dimensions::Upper ipz=7
+Local Domain Dimensions::nz=144

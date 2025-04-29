@@ -1,0 +1,194 @@
+---
+title: "State of the Practice: Power Provisioning - Power Evaluation of HPCG & HPL"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: 
+    keep_tex: true
+  html_notebook: default
+---
+
+# Preparation
+
+We do things in R here.
+
+First of all we clear the environment. Better be save than sorry.
+
+```{r warning=FALSE}
+rm(list=ls())
+```
+
+Now we load some handy packages.
+
+```{r message=FALSE}
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+```
+
+# Data preparation
+```{r}
+hpl  <- list(uc  = read.csv('./A2_hpl_uc.csv'),
+             spc = read.csv('./A2_hpl_spc.csv'),
+             dpc = read.csv('./A2_hpl_dpc.csv'))
+
+hpcg <- list(uc  = read.csv("A2_hpcg_uc.csv"),
+             spc = read.csv("A2_hpcg_spc.csv"),
+             dpc = read.csv("A2_hpcg_dpc.csv"))
+
+df.hpl <- list()
+
+for (c in c("uc","spc","dpc")) {
+  df.hpl[[c]] <- data.frame(time  = rep(as.POSIXct(hpl[[c]][,"Time"]),64),
+                            power = unlist(hpl[[c]][,2:65]),
+                            node  = rep(names(hpl[[c]][,2:65]),
+                                        each = dim(hpl[[c]])[1]))
+  rownames(df.hpl[[c]]) <- NULL
+  df.hpl[[c]] <- df.hpl[[c]] %>% filter(!is.na(power))
+}
+
+df.hpcg <- list()
+
+for (c in c("uc","spc","dpc")) {
+  df.hpcg[[c]] <- data.frame(time  = rep(as.POSIXct(hpcg[[c]][,"Time"]),64),
+                             power = unlist(hpcg[[c]][,2:65]),
+                             node  = rep(names(hpcg[[c]][,2:65]),
+                                         each = dim(hpcg[[c]])[1]))
+  rownames(df.hpcg[[c]]) <- NULL
+  df.hpcg[[c]] <- df.hpcg[[c]] %>% filter(!is.na(power))
+}
+```
+
+# Plot HPL raw data
+```{r}
+
+ggplot() + 
+  geom_line(data=df.hpl[["uc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+ggplot() + 
+  geom_line(data=df.hpl[["spc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+ggplot() + 
+  geom_line(data=df.hpl[["dpc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+
+```
+
+# Plot HCG raw data
+```{r}
+
+ggplot() + 
+  geom_line(data=df.hpcg[["uc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+ggplot() + 
+  geom_line(data=df.hpcg[["spc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+ggplot() + 
+  geom_line(data=df.hpcg[["dpc"]],aes(x=time,y=power,color=node),
+            show.legend = FALSE)
+
+```
+
+# Calculate power values presented in table V.
+
+## HPL
+```{r}
+unlist(
+lapply(df.hpl, function(x){ 
+  x %>% group_by(node) %>% 
+        summarize(node_power = median(power)) %>%
+        summarize(total_power = sum(node_power)/1000) 
+}))
+```
+
+## HPCG
+```{r}
+unlist(
+lapply(df.hpcg, function(x){ 
+  x %>% group_by(node) %>% 
+        summarize(node_power = median(power)) %>%
+        summarize(total_power = sum(node_power)/1000) 
+}))
+```
+# Generate figure 5
+
+## Prepare data for plotting
+
+Hint: We excluded power values originating from broken CMC sensors on
+node r9c1t8n3 for the dpc rund as well as node r7c4t4n3 for the uc run 
+for better readability of the graph.
+
+```{r message=FALSE}
+gg.plt <- list()
+
+for (c in c("uc", "spc", "dpc")) {
+  gg.plt[[c]] <- df.hpcg[[c]] %>% 
+  filter(node != "Node.r7c4t4n3") %>% 
+  mutate(time = round_date(time,unit = "10 sec")) %>%
+  group_by(time,node) %>% 
+  summarize(n.power.max  = max(power),
+            n.power.med  = median(power),
+            n.power.min  = min(power)) %>% 
+  group_by(time) %>% 
+  summarize(power.max  = sum(n.power.max)/1000,
+            power.med  = sum(n.power.med)/1000,
+            power.min  = sum(n.power.min)/1000) %>% 
+  mutate(time = as.integer(time)) %>%
+  mutate(time = time-min(time)+1)
+}
+```
+
+# Generate figure
+```{r}
+pdf(file = "A2_figure-5.pdf",height = 3)
+
+par(mar=c(5, 5, 4, 6) + 0.1)
+
+colors <- c("UC" = "red", "SPC" = "yellow3", "DPC" = "green2")
+
+ggplot() +
+  geom_ribbon(data=gg.plt[["uc"]],
+              aes(x=time,ymin=power.min,ymax=power.max),fill="red",
+              alpha=0.25) +
+  geom_line(data=gg.plt[["uc"]],
+            aes(x=time,y=power.min, color="UC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["uc"]],
+            aes(x=time,y=power.max, color="UC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["uc"]],
+            aes(x=time,y=power.med, color="UC"), linewidth=0.2) +
+  
+  geom_ribbon(data=gg.plt[["spc"]],
+              aes(x=time,ymin=power.min,ymax=power.max),fill="yellow3",
+              alpha=0.25) +
+  geom_line(data=gg.plt[["spc"]],
+            aes(x=time,y=power.min,color="SPC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["spc"]],
+            aes(x=time,y=power.max,color="SPC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["spc"]],
+            aes(x=time,y=power.med,color="SPC"), linewidth=0.2) + 
+  
+  geom_ribbon(data=gg.plt[["dpc"]],
+              aes(x=time,ymin=power.min,ymax=power.max),fill="green2",
+              alpha=0.25) +
+  geom_line(data=gg.plt[["dpc"]],
+            aes(x=time,y=power.min,color="DPC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["dpc"]],
+            aes(x=time,y=power.max,color="DPC"), linewidth=0.2) +
+  geom_line(data=gg.plt[["dpc"]],
+            aes(x=time,y=power.med,color="DPC"), linewidth=0.2) +
+  
+  xlab("Timestamp (secs)")    +
+  ylab("Measured Power (kW)") + 
+  
+  scale_color_manual(values = colors) + 
+  theme(legend.title = element_blank(),
+        legend.position = c(0.60,0.35),
+    # Hide panel borders and remove grid lines
+    panel.border = element_blank(),
+    panel.grid.major = element_line(linewidth = 0.2, linetype = 'solid',
+                                    colour = "gray85"),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", colour = "black"))
+
+dev.off()
+```

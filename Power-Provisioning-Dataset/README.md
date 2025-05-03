@@ -43,6 +43,35 @@ In addition to system-level telemetry, two additional application-level power me
 - High Performance Conjugate Gradients (HPCG) Benchmark power data from Lumi supercomputer.
 - High-Performance Linpack (HPL) Benchmark and HPCG power data, along with the different power capping algorithms (Figure 5 in the paper), from the Hawk supercomputer.
 
+### Acknowledgments
+Authors wish to thank Pekka Lehtovuori from CSC IT Center for
+Science Ltd., Finland for help with collection, review and release
+of the Lumi dataset. 
+
+Part of this work was performed under the
+auspices of the U.S. Department of Energy by Lawrence Livermore
+National Laboratory under Contract DE-AC52-07NA27344 (LLNL-
+CONF-862432). 
+
+Part of this material is based upon work supported
+by the Advanced Scientific Computing Research Program in the
+U.S. Department of Energy, Office of Science, under Award Number
+DE-AC02-05CH11231 and used resources of the National Energy
+Research Scientific Computing Center (NERSC), which is supported
+by the Office of Science of the U.S. Department of Energy under Con-
+tract No. DE-AC02-05CH11231. 
+
+Part of this research was sponsored
+by and used resources of the Oak Ridge Leadership Computing
+Facility (OLCF), which is a DOE Office of Science User Facility at
+the Oak Ridge National Laboratory (ORNL) supported by the U.S.
+Department of Energy under Contract No. DE-AC05-00OR22725.
+
+This work was partially funded by the German Federal Ministry
+of Education and Research (BMBF) and the Ministry of Science,
+Research and the Arts Baden-Württemberg (MWK) as part of the
+SiVeGCS project.
+
 ### License
 Creative Commons Attribution 4.0 International Public License
 
